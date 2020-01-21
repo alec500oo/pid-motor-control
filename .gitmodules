@@ -1,0 +1,3 @@
+[submodule "ardumoto"]
+	path = ardumoto
+	url = https://github.com/sparkfun/Ardumoto-Motor_Driver_Shield.git
