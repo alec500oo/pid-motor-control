@@ -1,4 +1,4 @@
-#include "MotorDrive.h"
+#include "motor_drive.h"
 
 void MotorDrive::SetupA() {
   pinMode(DIR_A, OUTPUT);
@@ -7,7 +7,7 @@ void MotorDrive::SetupA() {
   digitalWrite(PWM_A, LOW);
 }
 
-void MotorDrive::setupB() {
+void MotorDrive::SetupB() {
   pinMode(DIR_B, OUTPUT);
   pinMode(PWM_B, OUTPUT);
   digitalWrite(DIR_B, LOW);
@@ -28,7 +28,7 @@ void MotorDrive::SetSpeed(unsigned char value) {
     analogWrite(PWM_B, value); 
 }
 
-void MotorDrive::SetDirection(DIRECTION dir) {
+void MotorDrive::SetDirection(MOTOR_DIR dir) {
   if (motor == Motor::A)
     digitalWrite(DIR_A, dir);
   else

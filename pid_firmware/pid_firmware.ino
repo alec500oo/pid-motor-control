@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "message.h"
-#include "MotorDrive.h"
+#include "motor_drive.h"
 #include "pid.h"
 
 /* -- Pin Definitions -- */

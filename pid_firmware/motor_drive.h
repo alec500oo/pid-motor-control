@@ -7,7 +7,7 @@
  * @author Alec Matthews <alec500oo\@gmail.com>
  */
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 /** -- Pin Definitions -- */
 #define DIR_A 2
@@ -20,12 +20,12 @@
 enum class Motor {
   A,
   B
-}
+};
 
-typedef unsigned char DIRECTION;
+typedef unsigned char MOTOR_DIR;
 
-#define FORWARD 0;
-#define REVERSE 1;
+#define FORWARD 0
+#define REVERSE 1
 
 class MotorDrive {
 
@@ -33,10 +33,10 @@ class MotorDrive {
   Motor motor = Motor::A;
 
   /** Setup motor A pins */
-  SetupA();
+  void SetupA();
 
   /** Setup motor B pins */
-  SetupB();
+  void SetupB();
 
 public:
   /**
@@ -58,7 +58,7 @@ public:
    * Set motor direction
    * @param dir New motor direction.
    */
-  void SetDirection(DIRECTION dir);
+  void SetDirection(MOTOR_DIR dir);
 
   /** Disable the motor. */
   void Disable();
