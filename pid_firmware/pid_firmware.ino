@@ -17,6 +17,7 @@
 
 /* -- Pin Definitions -- */
 #define POT_PIN A0
+#define SENSE_PIN A1
 
 /* -- Structure Definitions -- */
 struct pidConstants {
@@ -53,9 +54,7 @@ void setup() {
   EEPROM.get(0, c);
 
   // Create control loop object.
-  // controlLoop = PID(c.kp, c.ki, c.kd);
-  // TODO: initialize PID with saved values.
-  controlLoop = PID(130, 0, 0);
+  controlLoop = PID(c.kp, c.ki, c.kd);
   controlLoop.SetTarget(100);
 
   // Setup motor.
@@ -76,16 +75,16 @@ void loop() {
   // Read sensor position
   short sensor_pos = analogRead(POT_PIN);
   long speed = controlLoop.ProcessLoop(sensor_pos);
-
-  Serial.print(" Out: ");
-  Serial.println(speed/1000);
+  double outspeed = (double)speed/1000;
 
   // Update motor position
-  // TODO: start motor disabled.
-  if (!enabled);
 
-  if (sensor_pos <= 150 || sensor_pos >= 900) {
+  // Limit the motor from moving outside the bounds of 15 - 285 deg.
+  if (!enabled || sensor_pos <= 51 || sensor_pos >= 973) {
     motor.Disable();
+  } else {
+    motor.SetDirection(!(outspeed < 0));
+    motor.SetSpeed(outspeed);
   }
 
   ProcessSerialMessage();
@@ -178,6 +177,10 @@ void SendCurrentPos() {
 }
 
 void SendVoltage() {
-  unsigned char buf[5] = {0x55, 0xAA, 0x03, 'V', 0};
-  // TODO: Figure out what analog pin the current sense resistor will be on.
+  unsigned char buf[6] = {0x55, 0xAA, 0x03, 'V', 0};
+  short volts = analogRead(SENSE_PIN);
+  buf[4] = volts >> 8;
+  buf[5] = volts & 0xFF;
+
+  Serial.write(buf, 6);
 }
