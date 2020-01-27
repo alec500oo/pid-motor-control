@@ -9,12 +9,14 @@
  */
 
 #include <EEPROM.h>
+#include <math.h>
 
 #include "message.h"
 #include "MotorDrive.h"
 #include "pid.h"
 
 /* -- Pin Definitions -- */
+#define POT_PIN A0
 
 /* -- Structure Definitions -- */
 struct pidConstants {
@@ -23,17 +25,14 @@ struct pidConstants {
   short kd;
 };
 
-/* -- Message Processing -- */
-Message msg = Message(&Serial);
-
 /* -- Function forward declerations -- */
 void ProcessSerialMessage();
 void ParseMessage();
 
 void EnableDevice(char* msg_ptr);
-void SetConstants(char* msg_ptr);
+void SetConstants(char* msg_ptr, PID* pid);
 void SaveConstants(PID* pid);
-void SetTarget(char* msg_ptr);
+void SetTarget(char* msg_ptr, PID* pid);
 
 void SendConstants(PID* pid);
 void SendTarget(PID* pid);
@@ -43,16 +42,21 @@ void SendVoltage();
 /* -- Global Variables -- */
 PID controlLoop = PID(0, 0, 0);
 MotorDrive motor = MotorDrive(Motor::A);
+Message msg = Message(&Serial);
+
 bool enabled = false;
 
 void setup() {
-
+  pinMode(POT_PIN, INPUT);
   // Get constant values from EEPROM
   pidConstants c;
   EEPROM.get(0, c);
 
   // Create control loop object.
-  controlLoop = PID(c.kp, c.ki, c.kd);
+  // controlLoop = PID(c.kp, c.ki, c.kd);
+  // TODO: initialize PID with saved values.
+  controlLoop = PID(130, 0, 0);
+  controlLoop.SetTarget(100);
 
   // Setup motor.
   motor.Setup();
@@ -70,11 +74,19 @@ void setup() {
 void loop() {
 
   // Read sensor position
-  // int sensor_pos = 0;
+  short sensor_pos = analogRead(POT_PIN);
+  long speed = controlLoop.ProcessLoop(sensor_pos);
 
-  // controlLoop.ProcessLoop(sensor_pos);
+  Serial.print(" Out: ");
+  Serial.println(speed/1000);
 
   // Update motor position
+  // TODO: start motor disabled.
+  if (!enabled);
+
+  if (sensor_pos <= 150 || sensor_pos >= 900) {
+    motor.Disable();
+  }
 
   ProcessSerialMessage();
 }
@@ -92,19 +104,19 @@ void ParseMessage(char* msg_ptr) {
     EnableDevice(msg_ptr);
     break;
   case 'C':
-    SetConstants(msg_ptr, *controlLoop);
+    SetConstants(msg_ptr, &controlLoop);
     break;
   case 'S':
-    SaveConstants(*controlLoop);
+    SaveConstants(&controlLoop);
     break;
   case 'T':
-    SetTarget(msg_ptr);
+    SetTarget(msg_ptr, &controlLoop);
     break;
   case 'c':
-    SendConstants(*controlLoop);
+    SendConstants(&controlLoop);
     break;
-  case 't'
-    SendTarget(*controlLoop);
+  case 't':
+    SendTarget(&controlLoop);
     break;
   case 's':
     SendCurrentPos();
@@ -135,11 +147,11 @@ void SetConstants(char* msg_ptr, PID* pid) {
 }
 
 void SetTarget(char* msg_ptr, PID* pid) {
-  pid->target = msg_ptr[4];
+  pid->SetTarget(msg_ptr[4]);
 }
 
 void SendConstants(PID* pid) {
-  char buf[10] = {0x55, 0xAA, 0x7, 'C', 0};
+  unsigned char buf[10] = {0x55, 0xAA, 0x7, 'C', 0};
   buf[4] = pid->kp >> 8;
   buf[5] = pid->kp & 0xFF;
   buf[6] = pid->ki >> 8;
@@ -151,16 +163,21 @@ void SendConstants(PID* pid) {
 }
 
 void SendTarget(PID* pid) {
-  char buf[5] = {0x55, 0xAA, 0x02, 'T', 0};
-  buf[4] = pid->target;
+  unsigned char buf[5] = {0x55, 0xAA, 0x02, 'T', 0};
+  buf[4] = pid->GetTarget();
 
   Serial.write(buf, 5);
 }
 
 void SendCurrentPos() {
+  unsigned char buf[5] = {0x55, 0xAA, 0x02, 'S', 0};
+  short val = analogRead(POT_PIN);
+  buf[4] = 15 + round((270/1024) * val);
 
+  Serial.write(buf, 5);
 }
 
 void SendVoltage() {
-
+  unsigned char buf[5] = {0x55, 0xAA, 0x03, 'V', 0};
+  // TODO: Figure out what analog pin the current sense resistor will be on.
 }

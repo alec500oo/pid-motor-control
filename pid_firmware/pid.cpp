@@ -1,12 +1,15 @@
 #include "pid.h"
 
-PID::PID(double kp, double ki, double kd) : kp(kp), ki(ki), kd(kd) { }
+#include <math.h>
 
-double PID::ProcessLoop(double sensorReading) {
-  double error = target - sensorReading;
+long PID::ProcessLoop(short sensorReading) {
+  short error = target_volts - sensorReading;
+
+  Serial.print("Error: ");
+  Serial.print(error);
 
   // Calculate the integral term and check for runaway error.
-  // TODO: a dT term may need to be added if the loop takes a different ammount
+  // TODO: a dT term may need to be added if the loop takes a different amount
   // of time to run each loop.
   integral += error;
   if (error == 0) integral = 0;
@@ -17,5 +20,10 @@ double PID::ProcessLoop(double sensorReading) {
   derivative -= prev_error;
 
   prev_error = error;
-  return (kp * error) + (ki * integral) + (kd * derivative);
+  return (kp * (long)error) + (ki * (long)integral) + (kd * (long)derivative);
+}
+
+void PID::SetTarget(unsigned char target) {
+  this->target_deg = target;
+  this->target_volts = round((double)(1024/270) * (target - 15));
 }

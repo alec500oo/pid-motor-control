@@ -10,17 +10,18 @@
 #include <Arduino.h>
 
 class PID {
-  double integral = 0;
-  double derivative = 0;
+  unsigned char target_deg = 0;
 
-  double prev_error = 0;
+  unsigned short target_volts = 0;
+
+  int integral = 0;
+  int derivative = 0;
+  short prev_error = 0;
 
 public:
   short kp = 0;
   short ki = 0;
   short kd = 0;
-
-  unsigned char target = 0;
 
   /**
    * Initialize the PID class with initial constant values for each control
@@ -29,7 +30,7 @@ public:
    * @param ki I term constant
    * @param kd D term constant
    */
-  PID(double kp, double ki, double kd);
+  PID(short kp, short ki, short kd) : kp(kp), ki(ki), kd(kd) {}
 
   /**
    * Process the next iteration of the PID control loop
@@ -38,7 +39,13 @@ public:
    * @returns The compensation value required to move the actuator error result
    * to move the actuator (DC motor) by.
    */
-  double ProcessLoop(double sensorReading);
+  long ProcessLoop(short sensorReading);
+
+  /** Set the target in degrees. */
+  void SetTarget(unsigned char target);
+
+  /** Get target in degrees. */
+  unsigned char GetTarget() { return target_deg; }
 };
 
 #endif /* PID_H */
