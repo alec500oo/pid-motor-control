@@ -13,11 +13,13 @@ long PID::ProcessLoop(short sensorReading) {
   // of time to run each loop.
   integral += error;
   if (error == 0) integral = 0;
-  if (abs(error) > 40) integral = 0;
+  // If we are greater than a quarter of the maximum away there is not point in
+  // integrating.
+  if (abs(error) > 256) integral = 0;
 
   // Calculate the derivative term.
   // TODO: May need to add a dT term depending on loop time
-  derivative -= prev_error;
+  derivative = error - prev_error;
 
   prev_error = error;
   return (kp * (long)error) + (ki * (long)integral) + (kd * (long)derivative);

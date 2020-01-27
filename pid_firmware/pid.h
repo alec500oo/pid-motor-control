@@ -11,11 +11,10 @@
 
 class PID {
   unsigned char target_deg = 0;
-
   unsigned short target_volts = 0;
 
-  int integral = 0;
-  int derivative = 0;
+  long integral = 0;
+  long derivative = 0;
   short prev_error = 0;
 
 public:
