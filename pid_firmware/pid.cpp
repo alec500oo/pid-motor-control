@@ -5,9 +5,6 @@
 long PID::ProcessLoop(short sensorReading) {
   short error = target_volts - sensorReading;
 
-  Serial.print("Error: ");
-  Serial.print(error);
-
   // Calculate the integral term and check for runaway error.
   // TODO: a dT term may need to be added if the loop takes a different amount
   // of time to run each loop.
