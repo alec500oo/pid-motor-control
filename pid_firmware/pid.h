@@ -41,10 +41,10 @@ public:
   long ProcessLoop(short sensorReading);
 
   /** Set the target in degrees. */
-  void SetTarget(unsigned char target);
+  void SetTarget(unsigned short target);
 
   /** Get target in degrees. */
-  short GetTarget() { return target_deg; }
+  unsigned short GetTarget() { return target_deg; }
 };
 
 #endif /* PID_H */

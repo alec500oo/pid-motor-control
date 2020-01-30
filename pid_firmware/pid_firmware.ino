@@ -142,13 +142,13 @@ void SaveConstants(PID* pid) {
 }
 
 void SetConstants(char* msg_ptr, PID* pid) {
-  pid->kp = (msg_ptr[4] << 8) + msg_ptr[5];
-  pid->ki = (msg_ptr[6] << 8) + msg_ptr[7];
-  pid->kd = (msg_ptr[8] << 8) + msg_ptr[9];
+  pid->kp = ((short)msg_ptr[4] << 8) + msg_ptr[5];
+  pid->ki = ((short)msg_ptr[6] << 8) + msg_ptr[7];
+  pid->kd = ((short)msg_ptr[8] << 8) + msg_ptr[9];
 }
 
 void SetTarget(char* msg_ptr, PID* pid) {
-  short target = (msg_ptr[4] << 8) + msg_ptr[5];
+  unsigned short target = ((short)msg_ptr[4] << 8) + msg_ptr[5];
   pid->SetTarget(target);
 }
 

@@ -22,7 +22,7 @@ long PID::ProcessLoop(short sensorReading) {
   return (kp * (long)error) + (ki * (long)integral) + (kd * (long)derivative);
 }
 
-void PID::SetTarget(unsigned char target) {
+void PID::SetTarget(unsigned short target) {
   this->target_deg = target;
   this->target_volts = round((double)(1024/270) * (target - 15));
 }
