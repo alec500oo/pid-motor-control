@@ -85,12 +85,12 @@ Save example with header:
 Set the new target position for the control loop. This value is mechanically limited to 0 - 270 degrees (0 - 4.7124
 radians) . The Arduino controller will include these limits in software to protect the sensor.
 
-- `'T' - mn` : Send new position in **degrees**
+- `'T' - mn - op` : Send new position in **degrees**
 
 Send to 100 degrees example:
 
 ```plaintext
-0x55 0xAA 0x02 0x54 0x64
+0x55 0xAA 0x03 0x54 0x00 0x64
 ```
 
 ### Request PID constants from controller
@@ -98,7 +98,7 @@ Send to 100 degrees example:
 Get the PID constants from the controller
 
 - Request: `'c'`
-- Response: `'C' - mn - op - qr - st - uv - wx` : same as [above](#tune-pid-constant-values)
+- Response: `'C' - mn - op - qr - st - uv - wx` : same structure as [send PID constants](#tune-pid-constant-values)
 
 To retrieve the decimal value from the returned signed shorts multiply the value by 10^-3. For example, to get kp from a
 message where `mn = 0x44` and `op = 0x22`: `0x4422 (17442) * 10^-3 = 17.442`.
@@ -108,7 +108,7 @@ message where `mn = 0x44` and `op = 0x22`: `0x4422 (17442) * 10^-3 = 17.442`.
 Get the current target value from the controller.
 
 - Request: `'t'`
-- Response: `'T' - mn`: same as [above](#set-target-position)
+- Response: `'T' - mn - op`: same as [above](#set-target-position)
 
 ### Request current position of the motor
 
@@ -116,7 +116,7 @@ This request gets the current position of the motor. Remember, this may be diffe
 motor!
 
 - Request: `'s'`
-- Response: `'S' - mn`: where `mn` is the current position in **degrees**
+- Response: `'S' - mn - op`: where `mn - op` is the current position in **degrees**
 
 ### Request voltage value
 

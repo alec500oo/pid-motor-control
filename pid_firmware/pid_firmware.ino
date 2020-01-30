@@ -48,12 +48,15 @@ Message msg = Message(&Serial);
 bool enabled = false;
 
 void setup() {
+  // Setup analog pins
   pinMode(POT_PIN, INPUT);
+  pinMode(SENSE_PIN, INPUT);
+
   // Get constant values from EEPROM
   pidConstants c;
   EEPROM.get(0, c);
 
-  // Create control loop object.
+  // Create control loop object and set default target.
   controlLoop = PID(c.kp, c.ki, c.kd);
   controlLoop.SetTarget(100);
 
@@ -66,8 +69,7 @@ void setup() {
   Serial.begin(115200, SERIAL_8E1);
 
   // Wait for serial connection to start
-  // TODO: Maybe time this out if we don't care about serial
-  while (!Serial); 
+  while (!Serial);
 }
 
 void loop() {
@@ -84,7 +86,7 @@ void loop() {
     motor.Disable();
   } else {
     motor.SetDirection(!(outspeed < 0));
-    motor.SetSpeed(outspeed);
+    motor.SetSpeed(abs(outspeed));
   }
 
   ProcessSerialMessage();
@@ -146,7 +148,8 @@ void SetConstants(char* msg_ptr, PID* pid) {
 }
 
 void SetTarget(char* msg_ptr, PID* pid) {
-  pid->SetTarget(msg_ptr[4]);
+  short target = (msg_ptr[4] << 8) + msg_ptr[5];
+  pid->SetTarget(target);
 }
 
 void SendConstants(PID* pid) {
@@ -162,18 +165,22 @@ void SendConstants(PID* pid) {
 }
 
 void SendTarget(PID* pid) {
-  unsigned char buf[5] = {0x55, 0xAA, 0x02, 'T', 0};
-  buf[4] = pid->GetTarget();
+  unsigned char buf[6] = {0x55, 0xAA, 0x02, 'T', 0};
+  short tmp = pid->GetTarget();
+  buf[4] = tmp >> 8;
+  buf[5] = tmp & 0xFF;
 
-  Serial.write(buf, 5);
+  Serial.write(buf, 6);
 }
 
 void SendCurrentPos() {
-  unsigned char buf[5] = {0x55, 0xAA, 0x02, 'S', 0};
+  unsigned char buf[6] = {0x55, 0xAA, 0x02, 'S', 0};
   short val = analogRead(POT_PIN);
-  buf[4] = 15 + round((270/1024) * val);
+  short tmp = 15 + round((270/1024) * val);
+  buf[4] = tmp >> 8;
+  buf[5] = tmp & 0xFF;
 
-  Serial.write(buf, 5);
+  Serial.write(buf, 6);
 }
 
 void SendVoltage() {

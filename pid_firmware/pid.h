@@ -10,7 +10,7 @@
 #include <Arduino.h>
 
 class PID {
-  unsigned char target_deg = 0;
+  unsigned short target_deg = 0;
   unsigned short target_volts = 0;
 
   long integral = 0;
@@ -44,7 +44,7 @@ public:
   void SetTarget(unsigned char target);
 
   /** Get target in degrees. */
-  unsigned char GetTarget() { return target_deg; }
+  short GetTarget() { return target_deg; }
 };
 
 #endif /* PID_H */
