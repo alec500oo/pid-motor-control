@@ -1,4 +1,4 @@
-/** pid_firmware.ino
+  /** pid_firmware.ino
  *  This firmware is meant to be loaded on to an Arduino compatable board with
  *  a motor shield. A PID control loop is used to position a DC motor in the
  *  correct angular position, and stabilize the motor in that target position.
@@ -142,13 +142,16 @@ void SaveConstants(PID* pid) {
 }
 
 void SetConstants(char* msg_ptr, PID* pid) {
-  pid->kp = (msg_ptr[4] << 8) + msg_ptr[5];
-  pid->ki = (msg_ptr[6] << 8) + msg_ptr[7];
-  pid->kd = (msg_ptr[8] << 8) + msg_ptr[9];
+  short kp_loc = msg_ptr[4];
+  short ki_loc = msg_ptr[6];
+  short kd_loc = msg_ptr[8];
+  pid->kp = (kp_loc << 8) + msg_ptr[5];
+  pid->ki = (ki_loc << 8) + msg_ptr[7];
+  pid->kd = (kd_loc << 8) + msg_ptr[9];
 }
 
 void SetTarget(char* msg_ptr, PID* pid) {
-  unsigned short target = (msg_ptr[4] << 8) + msg_ptr[5];
+  unsigned short target = ((unsigned short)msg_ptr[4] << 8) + msg_ptr[5];
   pid->SetTarget(target);
 }
 
